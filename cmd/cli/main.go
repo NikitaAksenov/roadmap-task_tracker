@@ -3,13 +3,18 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/NikitaAksenov/roadmap-task_tracker/internal/storage"
 )
 
 type application struct {
+	Storage storage.Storage
 }
 
 func main() {
-	app := &application{}
+	app := &application{
+		Storage: storage.NewStorage(),
+	}
 
 	if len(os.Args) < 2 {
 		fmt.Println("No command passed")
