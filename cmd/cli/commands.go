@@ -6,24 +6,24 @@ import (
 	"fmt"
 
 	"github.com/NikitaAksenov/roadmap-task_tracker/internal/storage/tasks"
+	"github.com/NikitaAksenov/roadmap-task_tracker/internal/validator"
 )
 
 func (app *application) commandAdd(args []string) {
 	flagSet := flag.NewFlagSet("add", flag.ExitOnError)
-	flagDescription := flagSet.String("description", "", "Description for new task")
+	parameterDescription := flagSet.String("description", "", "Description for new task")
 	flagSet.Parse(args)
 
-	if !IsFlagPassedInSet(flagSet, "description") {
-		fmt.Println("Parameter [-description] must be provided")
+	v := validator.New()
+
+	ValidateParameterDescription(v, flagSet, parameterDescription)
+
+	if !v.Valid() {
+		fmt.Println(v.PrettyString())
 		return
 	}
 
-	description := *flagDescription
-
-	if description == "" {
-		fmt.Println("Parameter [-description] must not be empty")
-		return
-	}
+	description := *parameterDescription
 
 	id, err := app.Storage.Tasks.Add(description)
 	if err != nil {
@@ -36,32 +36,22 @@ func (app *application) commandAdd(args []string) {
 
 func (app *application) commandUpdate(args []string) {
 	flagSet := flag.NewFlagSet("update", flag.ExitOnError)
-	flagID := flagSet.Int("id", 0, "ID of task to update")
-	flagDescription := flagSet.String("description", "", "New tasks description")
+	parameterID := flagSet.Int("id", 0, "ID of task to update")
+	parameterDescription := flagSet.String("description", "", "New tasks description")
 	flagSet.Parse(args)
 
-	if !IsFlagPassedInSet(flagSet, "id") {
-		fmt.Println("Parameter [-id] must be provided")
+	v := validator.New()
+
+	ValidateParameterID(v, flagSet, parameterID)
+	ValidateParameterDescription(v, flagSet, parameterDescription)
+
+	if !v.Valid() {
+		fmt.Println(v.PrettyString())
 		return
 	}
 
-	if !IsFlagPassedInSet(flagSet, "description") {
-		fmt.Println("Parameter [-description] must be provided")
-		return
-	}
-
-	id := *flagID
-	description := *flagDescription
-
-	if id <= 0 {
-		fmt.Println("Parameter [-id] must be > 0")
-		return
-	}
-
-	if description == "" {
-		fmt.Println("Parameter [-description] must not be empty")
-		return
-	}
+	id := *parameterID
+	description := *parameterDescription
 
 	err := app.Storage.Tasks.Update(id, description)
 	if err != nil {
