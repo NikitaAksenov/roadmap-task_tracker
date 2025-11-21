@@ -114,6 +114,11 @@ func (app *application) commandList(args []string) {
 		fmt.Printf("Error during list: %v", err)
 	}
 
+	if len(tasks) == 0 {
+		fmt.Println("No tasks found")
+		return
+	}
+
 	fmt.Printf("%-3s %-25s %-11s %10s %10s\n", "ID", "Description", "Status", "Created At", "Updated At")
 	for _, task := range tasks {
 		fmt.Printf("%-3d %-25s %-11s %10s %10s\n", task.ID, task.Description, task.Status, task.CreatedAt.Format("2006-01-02"), task.UpdatedAt.Format("2006-01-02"))
