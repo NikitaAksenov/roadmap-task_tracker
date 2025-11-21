@@ -1,6 +1,9 @@
 package tasks
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 type Task struct {
 	ID          int
@@ -22,3 +25,8 @@ type TasksStorage interface {
 	Delete(id int) error
 	List(status *string) error
 }
+
+var (
+	ErrTaskNotFound   = errors.New("task not found")
+	ErrTaskNotUpdated = errors.New("task not updated")
+)

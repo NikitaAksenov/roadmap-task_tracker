@@ -125,7 +125,29 @@ func (ts *TasksStorageJSON) Add(description string) (int, error) {
 }
 
 func (ts *TasksStorageJSON) Update(id int, description string) error {
-	return nil
+	tasks, err := ts.readJSON()
+	if err != nil {
+		return err
+	}
+
+	for i, task := range tasks {
+		if task.ID == id {
+			tasks[i].Description = description
+
+			if tasks[i] == task {
+				return ErrTaskNotUpdated
+			}
+
+			err = ts.writeJSON(tasks)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		}
+	}
+
+	return ErrTaskNotFound
 }
 
 func (ts *TasksStorageJSON) Delete(id int) error {
