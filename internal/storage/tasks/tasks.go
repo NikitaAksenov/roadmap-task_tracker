@@ -10,6 +10,12 @@ type Task struct {
 	UpdatedAt   time.Time
 }
 
+const (
+	StatusToDo       = "todo"
+	StatusInProgress = "in-progress"
+	StatusDone       = "done"
+)
+
 type TasksStorage interface {
 	Add(description string) error
 	Update(id int, description string) error
