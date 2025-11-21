@@ -104,9 +104,20 @@ func (app *application) commandList(args []string) {
 	parameterStatus := flagSet.String("status", "", "Status for task to be filtered on (optional)")
 	flagSet.Parse(args)
 
-	var status *string
+	var status *tasks.TaskStatus
 	if IsFlagPassedInSet(flagSet, "status") {
-		status = parameterStatus
+		statusValue, err := tasks.TaskStatusFromString(*parameterStatus)
+		if err != nil {
+			switch {
+			case errors.Is(err, tasks.ErrInvalidStatus):
+				fmt.Printf("Status %s is invalid\n", *parameterStatus)
+			default:
+				fmt.Println(err)
+			}
+			return
+		}
+
+		status = &statusValue
 	}
 
 	tasks, err := app.Storage.Tasks.GetAll(status)
@@ -123,4 +134,42 @@ func (app *application) commandList(args []string) {
 	for _, task := range tasks {
 		fmt.Printf("%-3d %-25s %-11s %10s %10s\n", task.ID, task.Description, task.Status, task.CreatedAt.Format("2006-01-02"), task.UpdatedAt.Format("2006-01-02"))
 	}
+}
+
+func (app *application) commandMark(args []string) {
+	flagSet := flag.NewFlagSet("mark", flag.ExitOnError)
+	parameterID := flagSet.Int("id", 0, "ID of task to set new status")
+	parameterStatus := flagSet.String("status", "", "New status for task")
+	flagSet.Parse(args)
+
+	v := validator.New()
+
+	ValidateParameterID(v, flagSet, parameterID)
+	ValidateParameterStatus(v, flagSet, parameterStatus)
+
+	if !v.Valid() {
+		fmt.Println(v.PrettyString())
+		return
+	}
+
+	id := *parameterID
+
+	status, err := tasks.TaskStatusFromString(*parameterStatus)
+	if err != nil {
+		switch {
+		case errors.Is(err, tasks.ErrInvalidStatus):
+			fmt.Printf("Status %s is invalid\n", *parameterStatus)
+		default:
+			fmt.Println(err)
+		}
+		return
+	}
+
+	err = app.Storage.Tasks.Mark(id, status)
+	if err != nil {
+		fmt.Printf("Error during mark: %v", err)
+		return
+	}
+
+	fmt.Printf("Successfully marked task #%d to status %s", id, status)
 }

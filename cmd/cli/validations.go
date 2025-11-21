@@ -19,3 +19,9 @@ func ValidateParameterID(v *validator.Validator, flagSet *flag.FlagSet, paramete
 	v.Check(IsFlagPassedInSet(flagSet, "id"), category, "must be provided")
 	v.Check(*parameterID > 0, category, "must be > 0")
 }
+
+func ValidateParameterStatus(v *validator.Validator, flagSet *flag.FlagSet, parameterStatus *string) {
+	category := "[-status]"
+
+	v.Check(IsFlagPassedInSet(flagSet, "status"), category, "must be provided")
+}

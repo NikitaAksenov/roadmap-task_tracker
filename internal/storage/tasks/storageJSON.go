@@ -26,21 +26,26 @@ type taskJSON struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
-func (tj taskJSON) toTask() Task {
+func (tj taskJSON) toTask() (Task, error) {
+	status, err := TaskStatusFromString(tj.Status)
+	if err != nil {
+		return Task{}, err
+	}
+
 	return Task{
 		ID:          tj.ID,
 		Description: tj.Description,
-		Status:      tj.Status,
+		Status:      status,
 		CreatedAt:   tj.CreatedAt,
 		UpdatedAt:   tj.UpdatedAt,
-	}
+	}, nil
 }
 
 func (t Task) toTaskJSON() taskJSON {
 	return taskJSON{
 		ID:          t.ID,
 		Description: t.Description,
-		Status:      t.Status,
+		Status:      t.Status.String(),
 		CreatedAt:   t.CreatedAt,
 		UpdatedAt:   t.UpdatedAt,
 	}
@@ -64,7 +69,10 @@ func (ts *TasksStorageJSON) readJSON() ([]Task, error) {
 
 	tasks := make([]Task, len(tasksJSON))
 	for i, taskJSON := range tasksJSON {
-		tasks[i] = taskJSON.toTask()
+		tasks[i], err = taskJSON.toTask()
+		if err != nil {
+			return nil, fmt.Errorf("error converting JSON to task: %v", err)
+		}
 	}
 
 	return tasks, nil
@@ -172,7 +180,7 @@ func (ts *TasksStorageJSON) Delete(id int) error {
 	return ErrTaskNotFound
 }
 
-func (ts *TasksStorageJSON) GetAll(status *string) ([]Task, error) {
+func (ts *TasksStorageJSON) GetAll(status *TaskStatus) ([]Task, error) {
 	tasks, err := ts.readJSON()
 	if err != nil {
 		return nil, err
@@ -193,4 +201,31 @@ func (ts *TasksStorageJSON) GetAll(status *string) ([]Task, error) {
 	}
 
 	return filteredTasks, nil
+}
+
+func (ts *TasksStorageJSON) Mark(id int, status TaskStatus) error {
+	tasks, err := ts.readJSON()
+	if err != nil {
+		return err
+	}
+
+	for i, task := range tasks {
+		if task.ID == id {
+			if task.Status == status {
+				return ErrSameStatus
+			}
+
+			tasks[i].Status = status
+			tasks[i].UpdatedAt = time.Now()
+
+			err = ts.writeJSON(tasks)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		}
+	}
+
+	return ErrTaskNotFound
 }

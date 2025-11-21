@@ -29,6 +29,7 @@ func main() {
 	router["update"] = app.commandUpdate
 	router["delete"] = app.commandDelete
 	router["list"] = app.commandList
+	router["mark"] = app.commandMark
 
 	if commandFunc, ok := router[command]; ok {
 		commandFunc(args)
