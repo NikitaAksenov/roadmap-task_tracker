@@ -1,15 +1,27 @@
 package main
 
-import "fmt"
+import (
+	"flag"
+	"fmt"
+)
 
 func (app *application) commandAdd(args []string) {
-	fmt.Println("add")
+	flagSet := flag.NewFlagSet("add", flag.ExitOnError)
+	flagDescription := flagSet.String("description", "", "New task description")
+	flagSet.Parse(args)
 
-	err := app.Storage.Tasks.Add("test")
+	if !IsFlagPassedInSet(flagSet, "description") {
+		fmt.Println("Parameter [-description] must be provided")
+		return
+	}
+
+	id, err := app.Storage.Tasks.Add(*flagDescription)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+
+	fmt.Printf("Task added successfully (ID: %d)", id)
 }
 
 func (app *application) commandUpdate(args []string) {

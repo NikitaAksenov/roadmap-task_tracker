@@ -95,10 +95,10 @@ func (ts *TasksStorageJSON) writeJSON(tasks []Task) error {
 	return nil
 }
 
-func (ts *TasksStorageJSON) Add(description string) error {
+func (ts *TasksStorageJSON) Add(description string) (int, error) {
 	tasks, err := ts.readJSON()
 	if err != nil {
-		return fmt.Errorf("error during Add: %v", err)
+		return 0, fmt.Errorf("error during Add: %v", err)
 	}
 
 	lastTaskID := 0
@@ -118,10 +118,10 @@ func (ts *TasksStorageJSON) Add(description string) error {
 
 	err = ts.writeJSON(tasks)
 	if err != nil {
-		return fmt.Errorf("error during Add: %v", err)
+		return 0, fmt.Errorf("error during Add: %v", err)
 	}
 
-	return nil
+	return task.ID, nil
 }
 
 func (ts *TasksStorageJSON) Update(id int, description string) error {
