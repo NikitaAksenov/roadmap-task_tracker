@@ -151,7 +151,25 @@ func (ts *TasksStorageJSON) Update(id int, description string) error {
 }
 
 func (ts *TasksStorageJSON) Delete(id int) error {
-	return nil
+	tasks, err := ts.readJSON()
+	if err != nil {
+		return err
+	}
+
+	for i, task := range tasks {
+		if task.ID == id {
+			tasks = append(tasks[:i], tasks[i+1:]...)
+
+			err = ts.writeJSON(tasks)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		}
+	}
+
+	return ErrTaskNotFound
 }
 
 func (ts *TasksStorageJSON) List(status *string) error {

@@ -70,7 +70,33 @@ func (app *application) commandUpdate(args []string) {
 }
 
 func (app *application) commandDelete(args []string) {
-	fmt.Println("delete")
+	flagSet := flag.NewFlagSet("update", flag.ExitOnError)
+	parameterID := flagSet.Int("id", 0, "ID of task to delete")
+	flagSet.Parse(args)
+
+	v := validator.New()
+
+	ValidateParameterID(v, flagSet, parameterID)
+
+	if !v.Valid() {
+		fmt.Println(v.PrettyString())
+		return
+	}
+
+	id := *parameterID
+
+	err := app.Storage.Tasks.Delete(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, tasks.ErrTaskNotFound):
+			fmt.Printf("Failed to find task with ID: %d", id)
+		default:
+			fmt.Printf("Error during delete: %v", err)
+		}
+		return
+	}
+
+	fmt.Printf("Task #%d deleted successfully", id)
 }
 
 func (app *application) commandList(args []string) {
