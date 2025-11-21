@@ -100,5 +100,22 @@ func (app *application) commandDelete(args []string) {
 }
 
 func (app *application) commandList(args []string) {
-	fmt.Println("list")
+	flagSet := flag.NewFlagSet("list", flag.ExitOnError)
+	parameterStatus := flagSet.String("status", "", "Status for task to be filtered on (optional)")
+	flagSet.Parse(args)
+
+	var status *string
+	if IsFlagPassedInSet(flagSet, "status") {
+		status = parameterStatus
+	}
+
+	tasks, err := app.Storage.Tasks.GetAll(status)
+	if err != nil {
+		fmt.Printf("Error during list: %v", err)
+	}
+
+	fmt.Printf("%-3s %-25s %-11s %10s %10s\n", "ID", "Description", "Status", "Created At", "Updated At")
+	for _, task := range tasks {
+		fmt.Printf("%-3d %-25s %-11s %10s %10s\n", task.ID, task.Description, task.Status, task.CreatedAt.Format("2006-01-02"), task.UpdatedAt.Format("2006-01-02"))
+	}
 }

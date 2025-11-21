@@ -23,7 +23,7 @@ type TasksStorage interface {
 	Add(description string) (int, error)
 	Update(id int, description string) error
 	Delete(id int) error
-	List(status *string) error
+	GetAll(status *string) ([]Task, error)
 }
 
 var (

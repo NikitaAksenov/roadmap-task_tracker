@@ -172,6 +172,25 @@ func (ts *TasksStorageJSON) Delete(id int) error {
 	return ErrTaskNotFound
 }
 
-func (ts *TasksStorageJSON) List(status *string) error {
-	return nil
+func (ts *TasksStorageJSON) GetAll(status *string) ([]Task, error) {
+	tasks, err := ts.readJSON()
+	if err != nil {
+		return nil, err
+	}
+
+	if status == nil {
+		return tasks, nil
+	}
+
+	filteredTasks := make([]Task, 0, len(tasks))
+
+	for _, task := range tasks {
+		if status != nil && task.Status != *status {
+			continue
+		}
+
+		filteredTasks = append(filteredTasks, task)
+	}
+
+	return filteredTasks, nil
 }
