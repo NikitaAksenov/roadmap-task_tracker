@@ -18,7 +18,14 @@ func (app *application) commandAdd(args []string) {
 		return
 	}
 
-	id, err := app.Storage.Tasks.Add(*flagDescription)
+	description := *flagDescription
+
+	if description == "" {
+		fmt.Println("Parameter [-description] must not be empty")
+		return
+	}
+
+	id, err := app.Storage.Tasks.Add(description)
 	if err != nil {
 		fmt.Println(err)
 		return
