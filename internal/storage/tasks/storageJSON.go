@@ -107,7 +107,7 @@ func (ts *TasksStorageJSON) Add(description string) error {
 	}
 
 	task := Task{
-		ID:          lastTaskID,
+		ID:          lastTaskID + 1,
 		Description: description,
 		Status:      StatusToDo,
 		CreatedAt:   time.Now(),
