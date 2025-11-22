@@ -101,7 +101,7 @@ func (app *application) commandDelete(args []string) {
 
 func (app *application) commandList(args []string) {
 	flagSet := flag.NewFlagSet("list", flag.ExitOnError)
-	parameterStatus := flagSet.String("status", "", "Status for task to be filtered on (optional)")
+	parameterStatus := flagSet.String("status", "", fmt.Sprintf("Status for task to be filtered on (optional). Allowed statuses: %s", tasks.AllowedTaskStatuses()))
 	flagSet.Parse(args)
 
 	var status *tasks.TaskStatus
@@ -110,7 +110,7 @@ func (app *application) commandList(args []string) {
 		if err != nil {
 			switch {
 			case errors.Is(err, tasks.ErrInvalidStatus):
-				fmt.Printf("Status %s is invalid\n", *parameterStatus)
+				fmt.Printf("Status %s is invalid. Allowed statuses: %s\n", *parameterStatus, tasks.AllowedTaskStatuses())
 			default:
 				fmt.Println(err)
 			}
@@ -139,7 +139,7 @@ func (app *application) commandList(args []string) {
 func (app *application) commandMark(args []string) {
 	flagSet := flag.NewFlagSet("mark", flag.ExitOnError)
 	parameterID := flagSet.Int("id", 0, "ID of task to set new status")
-	parameterStatus := flagSet.String("status", "", "New status for task")
+	parameterStatus := flagSet.String("status", "", fmt.Sprintf("New status for task. Allowed statuses: %s\n", tasks.AllowedTaskStatuses()))
 	flagSet.Parse(args)
 
 	v := validator.New()
@@ -158,7 +158,7 @@ func (app *application) commandMark(args []string) {
 	if err != nil {
 		switch {
 		case errors.Is(err, tasks.ErrInvalidStatus):
-			fmt.Printf("Status %s is invalid\n", *parameterStatus)
+			fmt.Printf("Status %s is invalid. Allowed statuses: %s\n", *parameterStatus, tasks.AllowedTaskStatuses())
 		default:
 			fmt.Println(err)
 		}

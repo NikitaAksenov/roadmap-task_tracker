@@ -38,6 +38,16 @@ func (ts TaskStatus) String() string {
 	return taskStatusString[ts]
 }
 
+func AllowedTaskStatuses() []string {
+	allowedStatuses := make([]string, 0, len(taskStatusString))
+
+	for _, str := range taskStatusString {
+		allowedStatuses = append(allowedStatuses, str)
+	}
+
+	return allowedStatuses
+}
+
 func TaskStatusFromString(s string) (TaskStatus, error) {
 	switch strings.TrimSpace(strings.ToLower(s)) {
 	case statusStringToDo:
