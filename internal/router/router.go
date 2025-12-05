@@ -38,3 +38,13 @@ func (r *Router) Execute(commandName string, args []string) error {
 
 	return ErrCommandNotExists
 }
+
+func (r *Router) GetAllowedCommands() []string {
+	allowedCommands := make([]string, 0, len(r.commands))
+
+	for k := range r.commands {
+		allowedCommands = append(allowedCommands, k)
+	}
+
+	return allowedCommands
+}

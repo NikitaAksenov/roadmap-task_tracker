@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -19,15 +20,25 @@ func main() {
 		Storage: storage.NewStorage(),
 	}
 
+	app.prepareCommands()
+
 	if len(os.Args) < 2 {
 		fmt.Println("No command passed")
+		app.PrintAllowedCommands()
 		return
 	}
 
 	command := os.Args[1]
 	args := os.Args[2:]
 
-	app.prepareCommands()
-
-	app.Router.Execute(command, args)
+	err := app.Router.Execute(command, args)
+	if err != nil {
+		switch {
+		case errors.Is(err, router.ErrCommandNotExists):
+			fmt.Printf("Unknown command [%s]\n", command)
+			app.PrintAllowedCommands()
+		default:
+			fmt.Println("Error:", err)
+		}
+	}
 }
